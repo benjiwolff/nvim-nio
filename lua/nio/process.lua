@@ -74,7 +74,7 @@ function nio.process.run(opts)
   local cmd = opts.cmd
   local args = opts.args
 
-  local exit_code_future = control.future()
+  local exit_code_future = control.future({ schedule_wake = opts.schedule_callback })
 
   local stdout, stdout_err = streams._socket_reader(opts.stdout)
   if not stdout then
@@ -172,5 +172,6 @@ end
 ---@field cwd? string Current working directory of the process
 ---@field uid? integer User ID of the process
 ---@field gid? integer Group ID of the process
+---@field schedule_callback boolean? (default: false) whether to schedule the rest of the coroutine using vim.schedule (e.g. to escape fast-event context)
 
 return nio.process
