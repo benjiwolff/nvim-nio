@@ -79,9 +79,6 @@ end
 ---@field clear fun(): nil Clear the event
 ---@field is_set fun(): boolean Returns true if the event is set
 
----@class nio.control.FutureOpts
----@field schedule_wake boolean? (default: false) Whether to schedule the task completion using vim.schedule (e.g. to escape fast-event context)
-
 --- Create a new future
 ---
 --- An future represents a value that will be available at some point and can be awaited upon.
@@ -105,10 +102,8 @@ end
 ---  local success, value = pcall(future.wait)
 ---  print(("%s: %s"):format(success, value))
 --- ```
----@param opts nio.control.FutureOpts?
 ---@return nio.control.Future
-function nio.control.future(opts)
-  opts = opts or {}
+function nio.control.future()
   local waiters = {}
   local result, err, is_set
   local wait = tasks.wrap(function(callback)
@@ -118,19 +113,12 @@ function nio.control.future(opts)
       waiters[#waiters + 1] = callback
     end
   end, 1)
-  local _wake = function()
-    for _, waiter in ipairs(waiters) do
-      waiter()
-    end
-  end
-  local wake
-  if opts.schedule_wake then
-    wake = function()
-      dprint("wake scheduled")
-      vim.schedule(_wake)
-    end
-  else
-    wake = _wake
+  local wake = function()
+    vim.schedule(function()
+      for _, waiter in ipairs(waiters) do
+        waiter()
+      end
+    end)
   end
   return {
     is_set = function()
