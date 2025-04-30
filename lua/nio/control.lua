@@ -53,9 +53,11 @@ function nio.control.event()
       if #waiters > 0 then
         is_set = false
       end
-      for _, waiter in ipairs(waiters_to_notify) do
-        waiter()
-      end
+      vim.schedule(function()
+        for _, waiter in ipairs(waiters_to_notify) do
+          waiter()
+        end
+      end)
     end,
     wait = tasks.wrap(function(callback)
       if is_set then
