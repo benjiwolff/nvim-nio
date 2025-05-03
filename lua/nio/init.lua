@@ -31,6 +31,16 @@ nio.lsp = lsp
 nio.process = process
 nio.file = file
 
+--- @class nio.Opts
+--- (default: false) Whether waiters should be scheduled in nvim.
+--- This can help when nvim tries to call waiters in a fast event context.
+---@field schedule_callback boolean 
+
+--- @param opts nio.Opts
+function nio.setup(opts)
+    control.schedule_callback = opts.schedule_callback    
+end
+
 --- Run a function in an async context. This is the entrypoint to all async
 --- functionality.
 --- ```lua
