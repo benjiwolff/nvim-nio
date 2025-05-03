@@ -6,7 +6,8 @@ local nio = {}
 ---@text
 --- Provides primitives for flow control in async functions
 ---@class nio.control
-nio.control = {}
+---@field schedule_callback boolean
+nio.control = { schedule_callback = false }
 
 --- Create a new event
 ---
@@ -53,8 +54,15 @@ function nio.control.event()
       if #waiters > 0 then
         is_set = false
       end
-      for _, waiter in ipairs(waiters_to_notify) do
-        waiter()
+      _wake = function()
+        for _, waiter in ipairs(waiters_to_notify) do
+          waiter()
+        end
+      end
+      if nio.control.schedule_callback then
+        vim.schedule(_wake)
+      else
+        _wake()
       end
     end,
     wait = tasks.wrap(function(callback)
@@ -111,10 +119,18 @@ function nio.control.future()
       waiters[#waiters + 1] = callback
     end
   end, 1)
-  local wake = function()
+  local _wake = function()
     for _, waiter in ipairs(waiters) do
       waiter()
     end
+  end
+  local wake
+  if nio.control.schedule_callback then
+    wake = function()
+      vim.schedule(_wake)
+    end
+  else
+    wake = _wake
   end
   return {
     is_set = function()
