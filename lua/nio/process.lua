@@ -113,7 +113,9 @@ function nio.process.run(opts)
     vim.loop.process_kill(handle, signal)
   end
 
-  task.on_cancel(signal)
+  task.on_cancel(function()
+    signal(15)
+  end)
 
   if not handle then
     return nil, pid_or_error
