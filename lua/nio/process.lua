@@ -110,7 +110,6 @@ function nio.process.run(opts)
   end)
 
   local signal = function(signal)
-    dprint("signalling cancel")
     vim.loop.process_kill(handle, signal)
   end
 
