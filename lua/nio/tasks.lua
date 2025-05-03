@@ -71,6 +71,7 @@ function nio.tasks.run(func, cb)
   local future = require("nio").control.future()
 
   function task.on_cancel(callback)
+    dprint("setting on_cancel")
     on_cancel = callback
   end
 
@@ -78,7 +79,9 @@ function nio.tasks.run(func, cb)
     if cancelled or coroutine.status(co) == "dead" then
       return
     end
+    dprint("check for on_cancel")
     if on_cancel then
+      dprint("calling on_cancel")
       on_cancel()
     end
     cancelled = true
