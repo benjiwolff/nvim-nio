@@ -6,8 +6,9 @@ local nio = {}
 ---@text
 --- Provides primitives for flow control in async functions
 ---@class nio.control
----@field schedule_callback boolean
-nio.control = { schedule_callback = false }
+--- (default: false) Whether waiters should be scheduled in nvim.
+--- This can help when nvim tries to call waiters in a fast event context.
+---@field schedule_callback boolean -- nio.control = { schedule_callback = false }
 
 --- Create a new event
 ---
