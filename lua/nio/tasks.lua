@@ -75,17 +75,26 @@ function nio.tasks.run(func, cb)
   end
 
   function task.cancel()
-    if cancelled or coroutine.status(co) == "dead" then
+    if cancelled then
       return
     end
+
+    local coroutine_dead = coroutine.status(co) == "dead"
     if on_cancel then
-      on_cancel()
+      if not coroutine_dead then
+        on_cancel()
+      end
+      on_cancel = nil
     end
     cancelled = true
+
     for _, child in pairs(child_tasks[task] or {}) do
       child.cancel()
     end
-    step()
+
+    if not coroutine_dead then
+      step()
+    end
   end
 
   function task.trace()
